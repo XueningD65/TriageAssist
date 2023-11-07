@@ -4,50 +4,31 @@
 
 ## Introduction
 
-Cardiovascular diseases (CVDs) are the leading cause of death worldwide, resulting in 17.9 million deaths annually, or 31% of global deaths. In a major hospital's emergency department, swift and accurate triaging can be the difference
-between life and death, especially for patients with potential heart conditions. 
+Cardiovascular diseases (CVDs) are the leading cause of death worldwide, resulting in 17.9 million deaths annually, or 31% of global deaths. In a major hospital's emergency department, swift and accurate triaging can be the difference between life and death, especially for patients with potential heart conditions. 
 Using machine learning, we are able to detect the common patterns between CVD patients and predict whether the patient is at high risk.
 
 
-## Dataset :
+## Dataset Attribute Information
+   1. Age: age of the patient [years]
+   2. Sex: sex of the patient [M: Male, F: Female]
+   3. ChestPainType: chest pain type [TA: Typical Angina, ATA: Atypical Angina, NAP: Non-Anginal Pain, ASY: Asymptomatic]
+   4. RestingBP: resting blood pressure [mm Hg]
+   5. Cholesterol: serum cholesterol [mm/dl]
+   6. FastingBS: fasting blood sugar [1: if FastingBS > 120 mg/dl, 0: otherwise]
+   7. RestingECG: resting electrocardiogram results [Normal: Normal, ST: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV), LVH: showing probable or definite left ventricular hypertrophy by Estes' criteria]
+   8. MaxHR: maximum heart rate achieved [Numeric value between 60 and 202]
+   9. ExerciseAngina: exercise-induced angina [Y: Yes, N: No]
+   10. Oldpeak: oldpeak = ST [Numeric value measured in depression]
+   11. ST_Slope: the slope of the peak exercise ST segment [Up: upsloping, Flat: flat, Down: downsloping]
+   12. HeartDisease: output class [1: heart disease, 0: Normal]
 
-The dataset consists of 779 individuals data.
-There are 15 columns in the dataset, however the first column name is not a good parameter as far as machine learning is considered so, there are effectively 14 columns.
+## Dataset Source
 
-1.	Age : displays the age of the individual.
-2.	Sex : displays the gender of the individual using the following   format : 1 = male
-          0 = female.
-3.	Chest-pain type : displays the type of chest-pain experienced by the individual using the following format :
-           1 = typical angina
-           2 = atypical angina
-           3 = non - anginal pain
-           4 = asymptotic
-4.	Resting Blood Pressure : displays the resting blood pressure value of an individual in mmHg (unit)
-5.	Serum Cholestrol : displays the serum cholestrol in mg/dl (unit)
-6.	Fasting Blood Sugar : compares the fasting blood sugar value of an individual with 120mg/dl. 
-   If fasting blood sugar > 120mg/dl then : 1  (true)
-                                else : 0   (false)
-7.	Resting ECG : 
-              0 = normal
-              1 = having ST-T wave abnormality
-              2 = left ventricular hyperthrophy
-8.	Max heart rate achieved : displays the max heart rate achieved by an individual.
-9.	Exercise induced angina : 
-              1 = yes
-              0 = no
-10.	ST depression induced by exercise relative to rest : displays the value which is integer or float.
-11.	Peak exercise ST segment : 
-              1 = upsloping
-              2 = flat
-              3 = downsloping
-12.	Number of major vessels (0-3) colored by flourosopy : displays the value as integer or float.
-13.	Thal : displays the thalassemia : 
-              3 = normal
-              6 = fixed defect
-              7 = reversable defect
-14.	Diagnosis of heart disease : Displays whether the individual is suffering from heart disease or not : 
-              0 = absence
-              1,2,3,4 = present.
+   - Cleveland: 303 observations
+   - Hungarian: 294 observations
+   - Switzerland: 123 observations
+   - Long Beach VA: 200 observations
+   - Stalog (Heart) Data Set: 270 observations
 
 ## Model Training and Prediction : 
 We can train our prediction model by analyzing existing data because we already know whether each patient has heart disease. This process is also known as supervision and learning. The trained model is then used to predict if users suffer from heart disease. The training and prediction process is described as follows:
