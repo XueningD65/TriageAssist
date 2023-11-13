@@ -1,11 +1,16 @@
 # TriageAssist - Auditing
 
-## This repository is cloned from [Heart Disease Prediction](https://github.com/ShubhankarRawat/Heart-Disease-Prediction.git)
+## This repository is adapted from [Heart Disease Prediction](https://github.com/ShubhankarRawat/Heart-Disease-Prediction.git)
 
 ## Introduction
 
 Cardiovascular diseases (CVDs) are the leading cause of death worldwide, resulting in 17.9 million deaths annually, or 31% of global deaths. In a major hospital's emergency department, swift and accurate triaging can be the difference between life and death, especially for patients with potential heart conditions. 
 Using machine learning, we are able to detect the common patterns between CVD patients and predict whether the patient is at high risk.
+
+## Install packages
+```
+pip install -r requirements.txt
+```
 
 
 ## Dataset Attribute Information
@@ -31,7 +36,10 @@ Using machine learning, we are able to detect the common patterns between CVD pa
    - Stalog (Heart) Data Set: 270 observations
 
 ## Model Training and Prediction : 
-We can train our prediction model by analyzing existing data because we already know whether each patient has heart disease. This process is also known as supervision and learning. The trained model is then used to predict if users suffer from heart disease. The training and prediction process is described as follows:
+`train.py` contains all the models trained and their results, including training and test accuracy, F1 score and confusion matrix. Run it directly by
+```
+python3 train.py
+```
 
 ## Splitting: 
 First, data is divided into two parts using component splitting. In this experiment, data is split based on a ratio of 80:20 for the training set and the prediction set. The training set data is used in the logistic regression component for model training, while the prediction set data is used in the prediction component.
