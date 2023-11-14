@@ -27,7 +27,7 @@ pip install -r requirements.txt
    11. ST_Slope: the slope of the peak exercise ST segment [Up: upsloping, Flat: flat, Down: downsloping]
    12. HeartDisease: output class [1: heart disease, 0: Normal]
 
-## Dataset Source
+## Dataset Description
 
    - Cleveland: 303 observations
    - Hungarian: 294 observations
@@ -35,19 +35,20 @@ pip install -r requirements.txt
    - Long Beach VA: 200 observations
    - Stalog (Heart) Data Set: 270 observations
 
-## Model Training and Prediction : 
+   The dataset is split into training and test set by the ratio 8:2. The training set has been augmented to ensure balance between the genders.
+
+## Model Training and Prediction
 `train.py` contains all the models trained and their results, including training and test accuracy, F1 score and confusion matrix. Run it directly by
 ```
 python3 train.py
 ```
 
-## Splitting: 
-First, data is divided into two parts using component splitting. In this experiment, data is split based on a ratio of 80:20 for the training set and the prediction set. The training set data is used in the logistic regression component for model training, while the prediction set data is used in the prediction component.
+## Interpret Black Box Models
+`SHAP` and `InterpretML` are used for interpreting the black box models.
+For those directly plotted in `matplotlib`, run
+```
+python3 model_explain_SHAP.py
+```
 
-The following classification models are used - Logistic Regression, Random Forest Classfier, SVM, Naive Bayes Classifier, Decision Tree Classifier, LightGBM, XGBoost
+For those requiring HTML to display results, open `model_explain_HTML.ipynb` and run cell by cell.
 
-## Prediction:
-The two inputs of the prediction component are the model and the prediction set. The prediction result shows the predicted data, actual data, and the probability of different results in each group.
-
-## Evaluation: 
-The confusion matrix, also known as the error matrix, is used to evaluate the accuracy of the model.

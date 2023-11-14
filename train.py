@@ -43,6 +43,9 @@ from sklearn import tree
 
 warnings.simplefilter("ignore")
 
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 12})
+
 rand_seed = 1234
 np.random.seed(rand_seed)
 
@@ -86,8 +89,8 @@ train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(test_pred, Y_t)*100)
 
 # uncomment if you want to plot the tree 
-#tree.plot_tree(model, feature_names = feature_names, ax=ax, fontsize=6, class_names=['No Disease', 'Has Disease'], filled=True)
-#plt.show()
+tree.plot_tree(model, feature_names = feature_names, ax=ax, fontsize=6, class_names=['No Disease', 'Has Disease'], filled=True)
+plt.show()
 
 ####### Random Forest #######
 feature_names = list(X.columns)
@@ -342,11 +345,11 @@ br1 = np.arange(len(train_acc))
 br2 = [x + barWidth for x in br1] 
 br3 = [x + barWidth for x in br2] 
 
-rect1 = ax.bar(br1, train_acc, width = barWidth, label = 'Train Accuracy', linewidth = 2)
+rect1 = ax.bar(br1, train_acc, width = barWidth, label = 'Train Accuracy', linewidth = 2, color = [224/250, 201/255, 191/255, 1])
 ax.bar_label(rect1, np.round(train_acc, 1), fmt='%.2f', padding = 3)
-rect2 = ax.bar(br2, acc, width = barWidth, label = 'Test Accuracy', linewidth = 2)
+rect2 = ax.bar(br2, acc, width = barWidth, label = 'Test Accuracy', linewidth = 2, color = [191/250, 156/255, 141/255, 1])
 ax.bar_label(rect2, np.round(acc, 1), fmt='%.2f', padding = 3)
-rect3 = ax.bar(br3, F1s, width = barWidth, label = 'F1 score', linewidth = 2)
+rect3 = ax.bar(br3, F1s, width = barWidth, label = 'F1 score', linewidth = 2, color = [64/250, 99/255, 144/255, 1])
 ax.bar_label(rect3, np.round(F1s, 1), fmt='%.2f', padding = 3)
 
 plt.xticks([r + barWidth for r in range(len(train_acc))], 
