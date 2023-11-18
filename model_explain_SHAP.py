@@ -72,7 +72,7 @@ X_train, y_train, A_train = f.resample_training_data(X_train, y_train, A_train)
 
 # train an XGBoost model
 # import xgboost
-# import shap
+import shap
 
 # from xgboost import XGBClassifier
 # xg = XGBClassifier()
@@ -164,16 +164,74 @@ X_train, y_train, A_train = f.resample_training_data(X_train, y_train, A_train)
 ############################################
 #     Use SHAP to analyze other models     #
 ############################################
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.naive_bayes import GaussianNB
+# classifier = LogisticRegression()
+# classifier.fit(X_train, y_train)
 
-import sklearn
-import shap
-from sklearn.model_selection import train_test_split
+
+# train_pred = classifier.predict(X_train)
+
+# # Predicting the Test set results
+# y_pred = classifier.predict(X_test)
+
+# print("Model: Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+#                                                                                   accuracy_score(y_pred, y_test)*100, 
+#                                                                                   f1_score(y_pred, y_test))) 
+
+# cm_test = confusion_matrix(y_pred, y_test)
+# cm_train = confusion_matrix(train_pred, y_train)
+# print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+# classifier.fit(X_train, y_train)
+
+# masker = shap.maskers.Independent(data=X_test)
+
+# explainer = shap.Explainer(
+#     classifier, masker=masker, feature_names=X_train.columns, algorithm="linear"
+# )
+
+# sv = explainer(X_test)
+# # visualize the first prediction's explanation
+# shap.plots.waterfall(sv[0])
+# plt.show()
+
+# # summarize the effects of all the features
+# shap.plots.bar(sv)
+
+# plt.show()
+
+from sklearn.naive_bayes import GaussianNB
+classifier = GaussianNB()
+classifier.fit(X_train, y_train)
+
+train_pred = classifier.predict(X_train)
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+cm_test = confusion_matrix(y_pred, y_test)
+cm_train = confusion_matrix(train_pred, y_train)
+
+print("Model:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+                                                                                  accuracy_score(y_pred, y_test)*100, 
+                                                                                  f1_score(y_pred, y_test))) 
+print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+# use Kernel SHAP to explain test set predictions
+explainer = shap.KernelExplainer(classifier.predict_proba, X_train, link="logit")
+shap_values = explainer.shap_values(X_test, nsamples=100)
+
+# plot the SHAP values for the Setosa output of the first instance
+shap.summary_plot(shap_values, X_test, plot_type="bar", max_display = 10)
+plt.savefig("figures/just_try/Fig_gaussianNB_bar.png")
+
+# shap.waterfall_plot(shap_values, X_test, plot_type="bar", max_display = 10)
+# plt.savefig("figures/just_try/Fig_gaussianNB_bar.png")
+
+
 from sklearn.svm import SVC
-
-# print the JS visualization code to the notebook
-shap.initjs()
-
-# train a SVM classifier
 classifier = SVC(kernel = 'linear', probability=True)
 classifier.fit(X_train, y_train)
 
@@ -182,14 +240,13 @@ train_pred = classifier.predict(X_train)
 # Predicting the Test set results
 y_pred = classifier.predict(X_test)
 
-
+from sklearn.metrics import confusion_matrix
 cm_test = confusion_matrix(y_pred, y_test)
 cm_train = confusion_matrix(train_pred, y_train)
 
-print("SVM linear:    Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+print("Model:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
                                                                                   f1_score(y_pred, y_test))) 
-print("Coefficients:", classifier.coef_)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
 
 # use Kernel SHAP to explain test set predictions
@@ -197,5 +254,92 @@ explainer = shap.KernelExplainer(classifier.predict_proba, X_train, link="logit"
 shap_values = explainer.shap_values(X_test, nsamples=100)
 
 # plot the SHAP values for the Setosa output of the first instance
-shap.force_plot(explainer.expected_value[0], shap_values[0][0,:], X_test.iloc[0,:], link="logit")
-plt.show()
+shap.summary_plot(shap_values, X_test, plot_type="bar", max_display = 10)
+plt.savefig("figures/just_try/Fig_SVM_bar.png")
+
+
+from sklearn.ensemble import RandomForestClassifier
+classifier = RandomForestClassifier(max_depth = 8, 
+                                            min_samples_split = 100,
+                                            n_estimators = 10,
+                                            random_state = 21)
+classifier.fit(X_train, y_train)
+
+train_pred = classifier.predict(X_train)
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+cm_test = confusion_matrix(y_pred, y_test)
+cm_train = confusion_matrix(train_pred, y_train)
+
+print("Model:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+                                                                                  accuracy_score(y_pred, y_test)*100, 
+                                                                                  f1_score(y_pred, y_test))) 
+print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+# use Kernel SHAP to explain test set predictions
+explainer = shap.KernelExplainer(classifier.predict_proba, X_train, link="logit")
+shap_values = explainer.shap_values(X_test, nsamples=100)
+
+# plot the SHAP values for the Setosa output of the first instance
+shap.summary_plot(shap_values, X_test, plot_type="bar", max_display = 10)
+plt.savefig("figures/just_try/Fig_random_forest_bar.png")
+
+from sklearn.ensemble import AdaBoostClassifier
+classifier = AdaBoostClassifier(n_estimators=20)
+classifier.fit(X_train, y_train)
+
+train_pred = classifier.predict(X_train)
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+cm_test = confusion_matrix(y_pred, y_test)
+cm_train = confusion_matrix(train_pred, y_train)
+
+print("Model:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+                                                                                  accuracy_score(y_pred, y_test)*100, 
+                                                                                  f1_score(y_pred, y_test))) 
+print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+# use Kernel SHAP to explain test set predictions
+explainer = shap.KernelExplainer(classifier.predict_proba, X_train, link="logit")
+shap_values = explainer.shap_values(X_test, nsamples=100)
+
+# plot the SHAP values for the Setosa output of the first instance
+shap.summary_plot(shap_values, X_test, plot_type="bar", max_display = 10)
+plt.savefig("figures/just_try/Fig_adaboost_bar.png")
+
+
+from sklearn.neural_network import MLPClassifier
+classifier = MLPClassifier(random_state=1, max_iter=300, 
+                           hidden_layer_sizes=(25, 50), 
+                           activation='logistic',
+                           learning_rate_init=0.001,
+                           solver='adam')
+classifier.fit(X_train, y_train)
+
+train_pred = classifier.predict(X_train)
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+cm_test = confusion_matrix(y_pred, y_test)
+cm_train = confusion_matrix(train_pred, y_train)
+
+print("Model:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+                                                                                  accuracy_score(y_pred, y_test)*100, 
+                                                                                  f1_score(y_pred, y_test))) 
+print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+# use Kernel SHAP to explain test set predictions
+explainer = shap.KernelExplainer(classifier.predict_proba, X_train, link="logit")
+shap_values = explainer.shap_values(X_test, nsamples=100)
+
+# plot the SHAP values for the Setosa output of the first instance
+shap.summary_plot(shap_values, X_test, plot_type="bar", max_display = 10)
+plt.savefig("figures/just_try/Fig_mlp_bar.png")
