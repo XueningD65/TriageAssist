@@ -68,7 +68,7 @@ X_train, X_test, y_train, y_test, A_train, A_test = train_test_split(
     X, Y, A_str, test_size=0.2, stratify=Y
 )
 
-X_train, y_train, A_train = f.resample_training_data(X_train, y_train, A_train)
+#X_train, y_train, A_train = f.resample_training_data(X_train, y_train, A_train)
 
 ####### Decision Tree #######
 feature_names = list(X.columns)
@@ -90,7 +90,7 @@ F1s.append(f1_score(test_pred, Y_t)*100)
 
 # uncomment if you want to plot the tree 
 tree.plot_tree(model, feature_names = feature_names, ax=ax, fontsize=6, class_names=['No Disease', 'Has Disease'], filled=True)
-plt.savefig("figures/accuracy/Fig_acc_decision_tree.png")
+plt.savefig("figures/accuracy/Fig_acc_decision_tree_before_balancing.png")
 plt.show()
 
 ####### Random Forest #######
@@ -361,6 +361,6 @@ plt.legend(loc = 'best')
 plt.ylim([80, 102])
 plt.yticks([80 + i * 5 for i in range(5)])
 plt.ylabel("Accuracy [%]/F1 score")
-plt.title("After Balancing")
-plt.savefig("figures/accuracy/Fig_acc_after_balance.png")
+plt.title("Before Balancing")
+plt.savefig("figures/accuracy/Fig_acc_without_balance.png")
 plt.show()

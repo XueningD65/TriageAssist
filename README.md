@@ -38,17 +38,41 @@ pip install -r requirements.txt
    The dataset is split into training and test set by the ratio 8:2. The training set has been augmented to ensure balance between the genders.
 
 ## Model Training and Prediction
-`train.py` contains all the models trained and their results, including training and test accuracy, F1 score and confusion matrix. Run it directly by
+`helper_func.py` contains a function which balances the number of labels.
+To see model training results before balancing:
+Run it directly by
+```
+python3 train_without_balance.py
+```
+To see model training results after balancing:
+Run it directly by
 ```
 python3 train.py
 ```
+Both files contain all the models trained and their results, including training and test accuracy, F1 score and confusion matrix. The train set and test set are split by 8:2.
 
 ## Interpret Black Box Models
-`SHAP` and `InterpretML` are used for interpreting the black box models.
+
+### Feature Importance (FI)
+`SHAP` is used for interpreting the black box models with feature importance (FI).
 For those directly plotted in `matplotlib`, run
 ```
-python3 model_explain_SHAP.py
+python3 model_explain_FI_SHAP.py
 ```
 
-For those requiring HTML to display results, open `model_explain_HTML.ipynb` and run cell by cell.
+For those requiring HTML to display results, open `model_explain_FI_HTML.ipynb` and run cell by cell.
 
+### Partial Dependence Plot (PDP)
+`SHAP` and `sklearn` is used for interpreting the black box models with feature importance (FI).
+For those directly plotted in `matplotlib`, run
+```
+python3 model_explain_PDP.py
+```
+The figures will be automatically saved.
+
+## Audit the fairness of models
+`Fairlearn` is used for measureing all types of fairness metrics, to view all kinds of results, run
+```
+python3 model_fairness.py [model_name_abbr]
+```
+where models include Decision Tree [DT], Random Forest [RF], Logistic Reg [LR], [SVM] (Linear), Naive Bayes [NB], [LightGBM], XGBoost [XGB], [Adaboost], multi-layer perceptron [MLP]. Use the names in [] when running the program.
