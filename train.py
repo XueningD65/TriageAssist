@@ -37,7 +37,7 @@ from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 from sklearn import tree
 
@@ -61,7 +61,7 @@ df.columns = ['Age','Sex','ChestPainType','RestingBP','Cholesterol','FastingBS',
 
 df['Sex'] = df.Sex.map({'F': 2, 'M': 1})
 Y, A = df.loc[:, "HeartDisease"], df.loc[:, "Sex"]
-X = pd.get_dummies(df.drop(columns=["HeartDisease", "Sex"]), dtype = float)
+X = pd.get_dummies(df.drop(columns=["HeartDisease"]), dtype = float)
 
 A_str = A.map({1: "male", 2: "female"})
 X_train, X_test, y_train, y_test, A_train, A_test = train_test_split(
@@ -89,8 +89,14 @@ train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(test_pred, Y_t)*100)
 
 # uncomment if you want to plot the tree 
-tree.plot_tree(model, feature_names = feature_names, ax=ax, fontsize=6, class_names=['No Disease', 'Has Disease'], filled=True)
+tree.plot_tree(model, feature_names = feature_names, ax=ax, fontsize=14, class_names=['No Disease', 'Has Disease'], filled=True)
+plt.tight_layout()
 plt.savefig("figures/accuracy/Fig_acc_decision_tree.png")
+plt.show()
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=model.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_decision_tree.png")
 plt.show()
 
 ####### Random Forest #######
@@ -119,6 +125,11 @@ F1s.append(f1_score(test_pred, y_test)*100)
 #     filename = 'figures/random_forest/Fig_random_forest_tree_'+str(i+1)+'.png'
 #     plt.show()
 
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=random_forest_model.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_random_forest.png")
+plt.show()
+
 ####### Logistic Regression #######
 from sklearn.linear_model import LogisticRegression
 classifier = LogisticRegression()
@@ -139,6 +150,11 @@ print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=classifier.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_logistic_regression.png")
+plt.show()
 
 
 ####### SVM #######
@@ -195,6 +211,11 @@ acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
 
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=classifier.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_SVM.png")
+plt.show()
+
 ####### Naive Bayes #######
 from sklearn.naive_bayes import GaussianNB
 classifier = GaussianNB()
@@ -216,6 +237,11 @@ print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=classifier.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_naive_bayes.png")
+plt.show()
 
 
 ####### lightgbm #######
@@ -254,6 +280,11 @@ acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(y_pred_train, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
 
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=[0, 1])
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_lightGBM.png")
+plt.show()
+
 
 ####### XGBoost #######
 from xgboost import XGBClassifier
@@ -281,6 +312,11 @@ acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(y_pred_train, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
 
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=xg.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_xgboost.png")
+plt.show()
+
 
 ####### AdaBoost #######
 from sklearn.ensemble import AdaBoostClassifier
@@ -303,6 +339,11 @@ print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=classifier.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_adaboost.png")
+plt.show()
 
 ####### Multi-layer Perceptron #######
 # hidden_layer_sizes=(100,), activation='relu', *, solver='adam', 
@@ -332,6 +373,11 @@ print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=classifier.classes_)
+disp.plot(text_kw ={"fontsize":15})
+plt.savefig("figures/confusion_matrix/Fig_cm_mlp.png")
+plt.show()
 
 # Visualize all results
 models = ['Decision Tree', 'Random Forest', 'Logistic Reg', 'SVM (Linear)', 'Naive Bayes', 'LightGBM', 'XGBoost', 'AdaBoost', 
