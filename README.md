@@ -62,6 +62,8 @@ python3 model_explain_FI_SHAP.py
 
 For those requiring HTML to display results, open `model_explain_FI_HTML.ipynb` and run cell by cell.
 
+We also verified the ranking of feature importance, and whether they positively or negatively impacted the final decision using `LIME` package. To see the results from it, open `model_explain_FI_LIME.ipynb` and run cell by cell.
+
 ### Partial Dependence Plot (PDP)
 `SHAP` and `sklearn` is used for interpreting the black box models with feature importance (FI).
 For those directly plotted in `matplotlib`, run
