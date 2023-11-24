@@ -24,6 +24,8 @@ from fairlearn.metrics import (
     equalized_odds_difference,
     false_positive_rate,
     false_negative_rate,
+    true_positive_rate,
+    true_negative_rate,
     equalized_odds_ratio,
     demographic_parity_ratio,
 )
@@ -222,10 +224,8 @@ if __name__ == '__main__':
         "balanced_accuracy": balanced_accuracy_score,
         "balanced_acc_error": balanced_accuracy_error,
         "selection_rate": selection_rate,
-        "false_positive_rate": false_positive_rate,
-        "false_positive_error": false_positive_error,
-        "false_negative_rate": false_negative_rate,
-        "false_negative_error": false_negative_error,
+        "sensitivity": true_positive_rate, # sensitivity
+        "specificity": true_negative_rate, # specificity
     }
 
     metric_frame = MetricFrame(
@@ -239,85 +239,85 @@ if __name__ == '__main__':
 
     ax = metric_frame.by_group.plot.bar(
         subplots=True,
-        layout=[3, 3],
+        layout=[2, 3],
         legend=False,
         figsize=[15, 9],
         title="Different Metrics used on Model",
     )
 
-    # x_offset = -0.12
-    # y_offset = -0.005
-    # for i in range(3):
-    #     for j in range(3):
-    #         for p in ax[i, j].patches:
-    #             b = p.get_bbox()
-    #             val = "{:.2f}".format(b.y1 + b.y0) 
-    #             if b.y1 + b.y0 == 0:       
-    #                 ax[i, j].annotate(val, ((b.x0 + b.x1)/2 + x_offset, b.y1 - y_offset))
-    #             else:
-    #                 ax[i, j].annotate(val, ((b.x0 + b.x1)/2 + x_offset, b.y1 + y_offset))
-    # plt.savefig("figures/fairness/Fig_"+model_name+"_metrics.png")
-    # plt.show()
+    x_offset = -0.12
+    y_offset = -0.005
+    for i in range(2):
+        for j in range(3):
+            for p in ax[i, j].patches:
+                b = p.get_bbox()
+                val = "{:.2f}".format(b.y1 + b.y0) 
+                if b.y1 + b.y0 == 0:       
+                    ax[i, j].annotate(val, ((b.x0 + b.x1)/2 + x_offset, b.y1 - y_offset))
+                else:
+                    ax[i, j].annotate(val, ((b.x0 + b.x1)/2 + x_offset, b.y1 + y_offset))
+    plt.savefig("figures/fairness/Fig_"+model_name+"_metrics.png")
+    plt.show()
 
-    postprocess_est = ThresholdOptimizer(
-    estimator = model,
-    constraints="selection_rate_parity",  # Optimize FPR and FNR simultaneously
-    objective="balanced_accuracy_score",
-    prefit=True,
-    predict_method="predict_proba",)
+    # postprocess_est = ThresholdOptimizer(
+    # estimator = model,
+    # constraints="selection_rate_parity",  # Optimize FPR and FNR simultaneously
+    # objective="balanced_accuracy_score",
+    # prefit=True,
+    # predict_method="predict_proba",)
     
-    postprocess_est.fit(X=X_train, y=y_train, sensitive_features=A_train)
+    # postprocess_est.fit(X=X_train, y=y_train, sensitive_features=A_train)
 
-    postprocess_pred = postprocess_est.predict(X_test, sensitive_features=A_test)
+    # postprocess_pred = postprocess_est.predict(X_test, sensitive_features=A_test)
 
-    postprocess_pred_proba = postprocess_est._pmf_predict(
-        X_test, sensitive_features=A_test
-    )
+    # postprocess_pred_proba = postprocess_est._pmf_predict(
+    #     X_test, sensitive_features=A_test
+    # )
 
-    if model_name == 'LightGBM':
-        for i in range(0, len(postprocess_pred)):
-            if postprocess_pred[i]>= 0.5:       # setting threshold to .5
-                postprocess_pred[i]=1
-            else:  
-                postprocess_pred[i]=0
+    # if model_name == 'LightGBM':
+    #     for i in range(0, len(postprocess_pred)):
+    #         if postprocess_pred[i]>= 0.5:       # setting threshold to .5
+    #             postprocess_pred[i]=1
+    #         else:  
+    #             postprocess_pred[i]=0
 
-    print("======Post Processing======")
-    mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
-    print("Overall Accuracy: ", mf.overall)
-    print(mf.by_group)
+    # print("======Post Processing======")
+    # mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
+    # print("Overall Accuracy: ", mf.overall)
+    # print(mf.by_group)
 
-    sr = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
-    print("Selection Rate: ", sr.overall)
-    print(sr.by_group)
+    # sr = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
+    # print("Selection Rate: ", sr.overall)
+    # print(sr.by_group)
 
-    bal_acc_postprocess = balanced_accuracy_score(y_test, postprocess_pred)
-    eq_odds_postprocess = equalized_odds_difference(
-    y_test, postprocess_pred, sensitive_features=A_test)
+    # bal_acc_postprocess = balanced_accuracy_score(y_test, postprocess_pred)
+    # eq_odds_postprocess = equalized_odds_difference(
+    # y_test, postprocess_pred, sensitive_features=A_test)
 
-    metricframe_postprocess = MetricFrame(
-        metrics=metrics,
-        y_true=y_test,
-        y_pred=postprocess_pred,
-        sensitive_features=A_test,
-    )
+    # metricframe_postprocess = MetricFrame(
+    #     metrics=metrics,
+    #     y_true=y_test,
+    #     y_pred=postprocess_pred,
+    #     sensitive_features=A_test,
+    # )
 
-    metrics_to_report = [
-    "balanced_accuracy",
-    "false_positive_rate",
-    "false_negative_rate",
-    "selection_rate"]
+    # metrics_to_report = [
+    # "balanced_accuracy",
+    # "false_positive_rate",
+    # "false_negative_rate",
+    # "selection_rate"]
 
-    metricframe_postprocess.overall[metrics_to_report]
-    print(metricframe_postprocess.difference()[metrics_to_report])
+    # metricframe_postprocess.overall[metrics_to_report]
+    # print(metricframe_postprocess.difference()[metrics_to_report])
 
-    metricframe_cmp = compare_metricframe_results(
-    metric_frame,
-    metricframe_postprocess,
-    metrics=metrics_to_report,
-    names=["Unmitigated", "PostProcess"],
-    )
+    # metricframe_cmp = compare_metricframe_results(
+    # metric_frame,
+    # metricframe_postprocess,
+    # metrics=metrics_to_report,
+    # names=["Unmitigated", "PostProcess"],
+    # )
     
-    metricframe_cmp.plot.bar(subplots=True, figsize=[16, 8], layout=[4, 2], legend=None, title='Compare unmitigated and mitigated')
+    # metricframe_cmp.plot.bar(subplots=True, figsize=[16, 8], layout=[4, 2], legend=None, title='Compare unmitigated and mitigated')
     # metricframe_postprocess.by_group[metrics_to_report].plot.bar(
     #     subplots=True, layout=[1, 4], figsize=[12, 4], legend=None, rot=0
     # )

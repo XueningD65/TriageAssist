@@ -35,11 +35,12 @@ import warnings
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 from sklearn import tree
 
@@ -150,64 +151,87 @@ if __name__ == '__main__':
     # print(A_train.value_counts())
     # print(A_test.value_counts())
 
-    model_name = sys.argv[1]
-
-    if model_name == 'DT':
-        model = DecisionTreeClassifier(min_samples_split = 50, max_depth=3, random_state=21)
-    elif model_name == 'RF':
-        model = RandomForestClassifier(max_depth = 8, 
-                                            min_samples_split = 100,
-                                            n_estimators = 10,
-                                            random_state = 21)
-    elif model_name == 'SVM':
-        model = SVC(kernel = 'linear', probability=True)
-    elif model_name == 'NB':
-        model = GaussianNB()
-    elif model_name == 'LR':
-        model = LogisticRegression()
-    elif model_name == 'XGB':
-        model = XGBClassifier()
-    elif model_name == 'Adaboost':
-        model = AdaBoostClassifier(n_estimators=20)
-    elif model_name == 'MLP':
-        model = MLPClassifier(random_state=1, max_iter=300, 
-                           hidden_layer_sizes=(25, 50), 
-                           activation='logistic',
-                           learning_rate_init=0.001,
-                           solver='adam')
-    elif model_name == 'LightGBM':
-        d_train = lgb.Dataset(X_train, label = y_train)
-        params = {}
-        model = lgb.train(params, d_train, 100)
-
+    ####### Random Forest #######
     feature_names = list(X.columns)
+    random_forest_model = RandomForestClassifier(max_depth = 8, 
+                                                min_samples_split = 100,
+                                                n_estimators = 10,
+                                                random_state = 21).fit(X_train, y_train)
 
-    if model_name != "LightGBM":
-        model = model.fit(X_train, y_train)
-    
-    train_pred = model.predict(X_train)
-    test_pred = model.predict(X_test)
-
-    if model_name == 'LightGBM':
-        #Prediction
-        for i in range(0, len(train_pred)):
-            if train_pred[i]>= 0.5:       # setting threshold to .5
-                train_pred[i]=1
-            else:  
-                train_pred[i]=0
-
-        for i in range(0, len(test_pred)):
-            if test_pred[i]>= 0.5:       # setting threshold to .5
-                test_pred[i]=1
-            else:  
-                test_pred[i]=0
-       
-
-    print("Model: Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+    train_pred = random_forest_model.predict(X_train)
+    test_pred = random_forest_model.predict(X_test)
+    print("Random Forest: Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                     accuracy_score(test_pred, y_test)*100, 
                                                                                     f1_score(test_pred, y_test))) 
-    
 
-    mf = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=y_test, sensitive_features=A_test)
-    print("Overall Selection Rate: ", mf.overall)
-    print(mf.by_group)
+    cm_test = confusion_matrix(test_pred, y_test)
+    cm_train = confusion_matrix(train_pred, y_train)
+    print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+    from xgboost import XGBClassifier
+    xg = XGBClassifier(n_estimators=100,
+                                 max_depth=3,  # limiting depth of trees
+                                 learning_rate=0.1,  # potentially adding regularization via learning rate
+                                 subsample=0.8,  # using a subsample of data to prevent overfitting
+                                 colsample_bytree=0.7,  # using a subsample of features for each tree
+                                 eval_metric='logloss',
+                                 random_state=42)
+    xg.fit(X_train, y_train)
+    y_pred = xg.predict(X_test)
+
+    from sklearn.metrics import confusion_matrix
+    cm_test = confusion_matrix(y_pred, y_test)
+
+    y_pred_train = xg.predict(X_train)
+        
+    cm_train = confusion_matrix(y_pred_train, y_train)
+    print("XGBoost:     Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(y_pred_train, y_train)*100, 
+                                                                                    accuracy_score(y_pred, y_test)*100, 
+                                                                                    f1_score(y_pred, y_test))) 
+    print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=xg.classes_)
+    disp.plot(text_kw ={"fontsize":15})
+   # plt.savefig("figures/confusion_matrix/Fig_cm_xgboost.png")
+    plt.show()
+
+    from sklearn.naive_bayes import GaussianNB
+    from sklearn.neighbors import KNeighborsClassifier
+    classifier = KNeighborsClassifier(n_neighbors=5)
+    classifier.fit(X_train, y_train)
+
+    train_pred = classifier.predict(X_train)
+
+    # Predicting the Test set results
+    y_pred = classifier.predict(X_test)
+
+    from sklearn.metrics import confusion_matrix
+    cm_test = confusion_matrix(y_pred, y_test)
+    cm_train = confusion_matrix(train_pred, y_train)
+
+    print("Naive Bayes:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
+                                                                                    accuracy_score(y_pred, y_test)*100, 
+                                                                                    f1_score(y_pred, y_test))) 
+    print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+
+    # Recreate the stacked model with base models
+    model_stack = StackingClassifier(estimators=[('rf', random_forest_model),
+                                                ('xgb', xg),
+                                                ('knn', classifier)],
+                                            final_estimator=LogisticRegression(),
+                                            stack_method='auto',
+                                            n_jobs=-1)
+    model_stack.fit(X_train, y_train)
+    y_pred = model_stack.predict(X_test)
+    cm_test = confusion_matrix(y_pred, y_test)
+    y_pred_train = xg.predict(X_train)
+        
+    cm_train = confusion_matrix(y_pred_train, y_train)
+    print("Stacking: Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(y_pred_train, y_train)*100, 
+                                                                                    accuracy_score(y_pred, y_test)*100, 
+                                                                                    f1_score(y_pred, y_test))) 
+    print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=xg.classes_)
+    disp.plot(text_kw ={"fontsize":15})
+   # plt.savefig("figures/confusion_matrix/Fig_cm_xgboost.png")
+    plt.show()

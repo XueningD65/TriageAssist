@@ -38,6 +38,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import classification_report
 
 from sklearn import tree
 
@@ -79,11 +80,14 @@ test_pred = model.predict(X_test)
 Y_t = np.array(y_test.tolist())
 print("Decision Tree: Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, \
                                                                                   accuracy_score(test_pred, y_test)*100,
-                                                                                  f1_score(test_pred, Y_t)))
+                                                                                  f1_score(y_test, test_pred)))
 
-cm_test = confusion_matrix(test_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, test_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
+
 acc.append(accuracy_score(test_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(test_pred, Y_t)*100)
@@ -110,11 +114,13 @@ train_pred = random_forest_model.predict(X_train)
 test_pred = random_forest_model.predict(X_test)
 print("Random Forest: Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(test_pred, y_test)*100, 
-                                                                                  f1_score(test_pred, y_test))) 
+                                                                                  f1_score(y_test, test_pred))) 
 
-cm_test = confusion_matrix(test_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, test_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(test_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(test_pred, y_test)*100)
@@ -142,11 +148,13 @@ y_pred = classifier.predict(X_test)
 
 print("Logistic Regression:Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 
-cm_test = confusion_matrix(y_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
@@ -169,10 +177,10 @@ y_pred = classifier.predict(X_test)
 
 print("SVM rbf:       Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 
-cm_test = confusion_matrix(y_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, test_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
 
 classifier = SVC(kernel = 'poly')
@@ -185,7 +193,7 @@ y_pred = classifier.predict(X_test)
 
 print("SVM poly:      Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 cm_test = confusion_matrix(y_pred, y_test)
 cm_train = confusion_matrix(train_pred, y_train)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
@@ -199,17 +207,20 @@ train_pred = classifier.predict(X_train)
 y_pred = classifier.predict(X_test)
 
 
-cm_test = confusion_matrix(y_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 
 print("SVM linear:    Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 print("Coefficients:", classifier.coef_)
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
+
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 
 disp = ConfusionMatrixDisplay(confusion_matrix=cm_test, display_labels=classifier.classes_)
 disp.plot(text_kw ={"fontsize":15})
@@ -227,13 +238,15 @@ train_pred = classifier.predict(X_train)
 y_pred = classifier.predict(X_test)
 
 from sklearn.metrics import confusion_matrix
-cm_test = confusion_matrix(y_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 
 print("Naive Bayes:   Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
@@ -270,12 +283,15 @@ for i in range(0, len(y_pred_train)):
     else:  
        y_pred_train[i]=0
        
-cm_train = confusion_matrix(y_pred_train, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, y_pred_train)
 
 print("lightgbm:      Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(y_pred_train, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(y_pred_train, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
@@ -303,11 +319,14 @@ for i in range(0, len(y_pred_train)):
     else:  
        y_pred_train[i]=0
        
-cm_train = confusion_matrix(y_pred_train, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, y_pred_train)
 print("XGBoost:     Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(y_pred_train, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(y_pred_train, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
@@ -329,13 +348,15 @@ train_pred = classifier.predict(X_train)
 y_pred = classifier.predict(X_test)
 
 from sklearn.metrics import confusion_matrix
-cm_test = confusion_matrix(y_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 
 print("AdaBoost 20:     Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
@@ -363,13 +384,15 @@ train_pred = classifier.predict(X_train)
 y_pred = classifier.predict(X_test)
 
 from sklearn.metrics import confusion_matrix
-cm_test = confusion_matrix(y_pred, y_test)
-cm_train = confusion_matrix(train_pred, y_train)
+cm_test = confusion_matrix(y_test, y_pred)
+cm_train = confusion_matrix(y_train, train_pred)
 
 print("Multi-layer Perceptron:Training accuracy: {:.2f}% | Test accuracy: {:.2f}% | F1 score: {:.3f}".format(accuracy_score(train_pred, y_train)*100, 
                                                                                   accuracy_score(y_pred, y_test)*100, 
-                                                                                  f1_score(y_pred, y_test))) 
+                                                                                  f1_score(y_test, y_pred))) 
 print("Train Confusion matrix", cm_train.ravel(), "| Test Confusion Matrix", cm_test.ravel())
+tn, fp, fn, tp = cm_test.ravel()
+print("Sensitivity = {:.3f} | Specificity = {:.3f}".format(tp/(tp+fn), tn/(tn+fp)))
 acc.append(accuracy_score(y_pred, y_test)*100)
 train_acc.append(accuracy_score(train_pred, y_train)*100)
 F1s.append(f1_score(y_pred, y_test)*100)
