@@ -25,8 +25,11 @@ from fairlearn.metrics import (
     equalized_odds_difference,
     false_positive_rate,
     false_negative_rate,
+    true_positive_rate,
+    true_negative_rate,
     equalized_odds_ratio,
     demographic_parity_ratio,
+    
 )
 from fairlearn.postprocessing import ThresholdOptimizer
 from fairlearn.reductions import ExponentiatedGradient
@@ -139,7 +142,6 @@ if __name__ == '__main__':
     df['Sex'] = df.Sex.map({'F': 2, 'M': 1})
     Y, A = df.loc[:, "HeartDisease"], df.loc[:, "Sex"]
     B = df.loc[:, "Age"]
-    print(B.min(), B.max())
     X = pd.get_dummies(df.drop(columns=["HeartDisease"]), dtype = float)
 
     A_str = A.map({1: "male", 2: "female"})
@@ -147,6 +149,8 @@ if __name__ == '__main__':
         X, Y, B, test_size=0.2, stratify=Y
     )
     X_train, y_train, A_train = f.resample_training_data(X_train, y_train, A_train)
+
+    ####### Load the models #######
 
     model_name = sys.argv[1]
 
@@ -182,6 +186,8 @@ if __name__ == '__main__':
 
     if model_name != "LightGBM":
         model = model.fit(X_train, y_train)
+
+    ####### Training and testing of the model #######
     
     train_pred = model.predict(X_train)
     test_pred = model.predict(X_test)
@@ -208,6 +214,8 @@ if __name__ == '__main__':
     mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
     print("Overall Accuracy: ", mf.overall)
 
+    ####### Divide the numerical ages into groups #######
+
     age_group = mf.by_group._data.items.to_numpy()
     accuracy_age_group = mf.by_group.to_numpy()
 
@@ -215,6 +223,7 @@ if __name__ == '__main__':
     age_idx = age_count._data.items.to_numpy()
     age_frequency = age_count.to_numpy()
     age_freq_dict = {}
+    age_positive_dict = {"39-":0, "40-49":0, "50-59":0, "60-69":0, "70+":0}
 
     for i, age in enumerate(age_idx):
         age_freq_dict[age] = age_frequency[i]
@@ -225,15 +234,19 @@ if __name__ == '__main__':
         if age < 40:
             age_acc_dict["39-"] += accuracy_age_group[i] * age_freq_dict[age]
             age_freq_dict_group["39-"] += age_freq_dict[age]
+
         elif age < 50:
             age_acc_dict["40-49"] += accuracy_age_group[i] * age_freq_dict[age]
             age_freq_dict_group["40-49"] += age_freq_dict[age]
+
         elif age < 60:
             age_acc_dict["50-59"] += accuracy_age_group[i] * age_freq_dict[age]
             age_freq_dict_group["50-59"] += age_freq_dict[age]
+
         elif age < 70:
             age_acc_dict["60-69"] += accuracy_age_group[i] * age_freq_dict[age]
             age_freq_dict_group["60-69"] += age_freq_dict[age]
+
         else:
             age_acc_dict["70+"] += accuracy_age_group[i] * age_freq_dict[age]
             age_freq_dict_group["70+"] += age_freq_dict[age]
@@ -241,22 +254,48 @@ if __name__ == '__main__':
     for idx in age_freq_dict_group.keys():
         age_acc_dict[idx] = age_acc_dict[idx] * 100 / age_freq_dict_group[idx]
 
+    for i, age in enumerate(X_train.loc[:, "Age"]):
+        if age < 40:
+            if y_train.to_numpy()[i] == 1:
+                age_positive_dict["39-"] += 1
+        elif age < 50:
+            if y_train.to_numpy()[i] == 1:
+                age_positive_dict["40-49"] += 1
+        elif age < 60:
+            if y_train.to_numpy()[i] == 1:
+                age_positive_dict["50-59"] += 1
+        elif age < 70:
+            if y_train.to_numpy()[i] == 1:
+                age_positive_dict["60-69"] += 1
+        else:
+            if y_train.to_numpy()[i] == 1:
+                age_positive_dict["70+"] += 1
+
+    print(age_positive_dict)
+    print(age_freq_dict_group)
+
+    B_str = B.apply(lambda age: "39-" if age < 40 else "40-49" if age < 50 else "50-59" if age < 60 else "60-69" if age < 70 else "70+")
 
     A_test = A_test.apply(lambda age: "39-" if age < 40 else "40-49" if age < 50 else "50-59" if age < 60 else "60-69" if age < 70 else "70+")
+    A_train = A_train.apply(lambda age: "39-" if age < 40 else "40-49" if age < 50 else "50-59" if age < 60 else "60-69" if age < 70 else "70+")
+    print(A_train.value_counts())
+
+    ####### Compute and print selective metrics #######
+    
     mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
     print("Overall Accuracy: ", mf.overall)
     print(mf.by_group)
 
-    mf = MetricFrame(metrics=false_positive_rate, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
-    print("Overall FPR: ", mf.overall)
+    mf = MetricFrame(metrics=true_positive_rate, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
+    print("Overall Sensitivity: ", mf.overall)
     print(mf.by_group)
 
-    mf = MetricFrame(metrics=false_negative_rate, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
-    print("Overall FNR: ", mf.overall)
+    mf = MetricFrame(metrics=true_negative_rate, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
+    print("Overall Specificity: ", mf.overall)
     print(mf.by_group)
 
     print("Equalized odds ratio: ", equalized_odds_ratio(y_true=y_test, y_pred=test_pred, sensitive_features=A_test))
-    print("Demographic Parity Ratio: ", demographic_parity_ratio(y_true=y_test, y_pred=test_pred, sensitive_features=A_test))
+    print("Equalized odds difference: ", equalized_odds_difference(y_true=y_test, y_pred=test_pred, sensitive_features=A_test))
 
     # fig, ax = plt.subplots(1, 1, figsize = (8, 4))
     # ax.plot(age_acc_dict.keys(), age_acc_dict.values())

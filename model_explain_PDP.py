@@ -185,22 +185,22 @@ plt.show()
 ########################
 import lightgbm as lgb # need to return to version 4.1.0
 
-# params = {}
+params = {}
 
-# d_train = lgb.Dataset(X_train, label = y_train)
-# lgbm_sk = lgb.LGBMRegressor(metric='l1', objective='regression',deterministic=True, random_state=4)
+d_train = lgb.Dataset(X_train, label = y_train)
+lgbm_sk = lgb.LGBMRegressor(metric='l1', objective='regression',deterministic=True, random_state=4)
 
-# lgbm_sk.fit(X_train.to_numpy(), y_train.to_numpy())
+lgbm_sk.fit(X_train.to_numpy(), y_train.to_numpy())
 
 
-# #Prediction
-# features = [0, 1, (0, 1)]
+#Prediction
+features = [0, 1, (0, 1)]
 
-# fig, ax = plt.subplots(1, 3, figsize=(12, 4))
-# pdp_plot = PartialDependenceDisplay.from_estimator(lgbm_sk, X_train, features, ax = ax)
-# plt.tight_layout()
-# #plt.savefig("figures/PDP_plots/Fig_lightgbm_PDP.png")
-# plt.show()
+fig, ax = plt.subplots(1, 3, figsize=(12, 4))
+pdp_plot = PartialDependenceDisplay.from_estimator(lgbm_sk, X_train, features, ax = ax)
+plt.tight_layout()
+plt.savefig("figures/PDP_plots/Fig_lightgbm_PDP.png")
+plt.show()
 
 ########################
 #Support Vector Machine#

@@ -152,6 +152,7 @@ if __name__ == '__main__':
     # print(A_train.value_counts())
     # print(A_test.value_counts())
 
+    ####### Check model name #######
     model_name = sys.argv[1]
 
     if model_name == 'DT':
@@ -184,6 +185,8 @@ if __name__ == '__main__':
 
     feature_names = list(X.columns)
 
+    ####### Training and testing of the model #######
+
     if model_name != "LightGBM":
         model = model.fit(X_train, y_train)
     
@@ -209,14 +212,15 @@ if __name__ == '__main__':
                                                                                     accuracy_score(test_pred, y_test)*100, 
                                                                                     f1_score(test_pred, y_test))) 
     
+    ####### Print out the selective model performance metrics #######
 
-    # mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
-    # print("Overall Accuracy: ", mf.overall)
-    # print(mf.by_group)
+    mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
+    print("Overall Accuracy: ", mf.overall)
+    print(mf.by_group)
 
-    # sr = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
-    # print("Selection Rate: ", sr.overall)
-    # print(sr.by_group)
+    sr = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=test_pred, sensitive_features=A_test)
+    print("Selection Rate: ", sr.overall)
+    print(sr.by_group)
 
     metrics = {
         # "demographic_parity_ratio": demographic_parity_ratio,
@@ -236,6 +240,19 @@ if __name__ == '__main__':
 
     print("Equalized odds ratio: ", equalized_odds_ratio(y_true=y_test, y_pred=test_pred, sensitive_features=A_test))
     print("Demographic Parity Ratio: ", demographic_parity_ratio(y_true=y_test, y_pred=test_pred, sensitive_features=A_test))
+
+    gender_positive_dict = {"male":0, "female":0}
+    for i, gender in enumerate(X_train.loc[:, "Sex"]):
+        if gender == 1:
+            if y_train.to_numpy()[i] == 1:
+                gender_positive_dict["male"] += 1
+        else:
+            if y_train.to_numpy()[i] == 1:
+                gender_positive_dict["female"] += 1
+    print(gender_positive_dict)
+    print(A_train.value_counts())
+
+    ####### Plot model performance per subgroup #######
 
     ax = metric_frame.by_group.plot.bar(
         subplots=True,
@@ -259,68 +276,70 @@ if __name__ == '__main__':
     plt.savefig("figures/fairness/Fig_"+model_name+"_metrics.png")
     plt.show()
 
-    # postprocess_est = ThresholdOptimizer(
-    # estimator = model,
-    # constraints="selection_rate_parity",  # Optimize FPR and FNR simultaneously
-    # objective="balanced_accuracy_score",
-    # prefit=True,
-    # predict_method="predict_proba",)
+    # check some fairness mitigation strategies
+    postprocess_est = ThresholdOptimizer(
+    estimator = model,
+    constraints="selection_rate_parity",  # Optimize FPR and FNR simultaneously
+    objective="balanced_accuracy_score",
+    prefit=True,
+    predict_method="predict_proba",)
     
-    # postprocess_est.fit(X=X_train, y=y_train, sensitive_features=A_train)
+    postprocess_est.fit(X=X_train, y=y_train, sensitive_features=A_train)
 
-    # postprocess_pred = postprocess_est.predict(X_test, sensitive_features=A_test)
+    postprocess_pred = postprocess_est.predict(X_test, sensitive_features=A_test)
 
-    # postprocess_pred_proba = postprocess_est._pmf_predict(
-    #     X_test, sensitive_features=A_test
-    # )
+    postprocess_pred_proba = postprocess_est._pmf_predict(
+        X_test, sensitive_features=A_test
+    )
 
-    # if model_name == 'LightGBM':
-    #     for i in range(0, len(postprocess_pred)):
-    #         if postprocess_pred[i]>= 0.5:       # setting threshold to .5
-    #             postprocess_pred[i]=1
-    #         else:  
-    #             postprocess_pred[i]=0
+    if model_name == 'LightGBM':
+        for i in range(0, len(postprocess_pred)):
+            if postprocess_pred[i]>= 0.5:       # setting threshold to .5
+                postprocess_pred[i]=1
+            else:  
+                postprocess_pred[i]=0
 
-    # print("======Post Processing======")
-    # mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
-    # print("Overall Accuracy: ", mf.overall)
-    # print(mf.by_group)
+    print("======Post Processing======")
+    mf = MetricFrame(metrics=accuracy_score, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
+    print("Overall Accuracy: ", mf.overall)
+    print(mf.by_group)
 
-    # sr = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
-    # print("Selection Rate: ", sr.overall)
-    # print(sr.by_group)
+    sr = MetricFrame(metrics=selection_rate, y_true=y_test, y_pred=postprocess_pred, sensitive_features=A_test)
+    print("Selection Rate: ", sr.overall)
+    print(sr.by_group)
 
-    # bal_acc_postprocess = balanced_accuracy_score(y_test, postprocess_pred)
-    # eq_odds_postprocess = equalized_odds_difference(
-    # y_test, postprocess_pred, sensitive_features=A_test)
+    bal_acc_postprocess = balanced_accuracy_score(y_test, postprocess_pred)
+    eq_odds_postprocess = equalized_odds_difference(
+    y_test, postprocess_pred, sensitive_features=A_test)
 
-    # metricframe_postprocess = MetricFrame(
-    #     metrics=metrics,
-    #     y_true=y_test,
-    #     y_pred=postprocess_pred,
-    #     sensitive_features=A_test,
-    # )
+    metricframe_postprocess = MetricFrame(
+        metrics=metrics,
+        y_true=y_test,
+        y_pred=postprocess_pred,
+        sensitive_features=A_test,
+    )
 
-    # metrics_to_report = [
-    # "balanced_accuracy",
-    # "false_positive_rate",
-    # "false_negative_rate",
-    # "selection_rate"]
+    metrics_to_report = [
+    "balanced_accuracy",
+    "false_positive_rate",
+    "false_negative_rate",
+    "selection_rate"]
 
-    # metricframe_postprocess.overall[metrics_to_report]
-    # print(metricframe_postprocess.difference()[metrics_to_report])
+    metricframe_postprocess.overall[metrics_to_report]
+    print(metricframe_postprocess.difference()[metrics_to_report])
 
-    # metricframe_cmp = compare_metricframe_results(
-    # metric_frame,
-    # metricframe_postprocess,
-    # metrics=metrics_to_report,
-    # names=["Unmitigated", "PostProcess"],
-    # )
+    ####### Compare the model performance before and after mitigation #######
+
+    metricframe_cmp = compare_metricframe_results(
+    metric_frame,
+    metricframe_postprocess,
+    metrics=metrics_to_report,
+    names=["Unmitigated", "PostProcess"],
+    )
     
-    # metricframe_cmp.plot.bar(subplots=True, figsize=[16, 8], layout=[4, 2], legend=None, title='Compare unmitigated and mitigated')
-    # metricframe_postprocess.by_group[metrics_to_report].plot.bar(
-    #     subplots=True, layout=[1, 4], figsize=[12, 4], legend=None, rot=0
-    # )
+    metricframe_cmp.plot.bar(subplots=True, figsize=[16, 8], layout=[4, 2], legend=None, title='Compare unmitigated and mitigated')
+    metricframe_postprocess.by_group[metrics_to_report].plot.bar(
+        subplots=True, layout=[1, 4], figsize=[12, 4], legend=None, rot=0
+    )
 
-
-    # plt.show()
+    plt.show()

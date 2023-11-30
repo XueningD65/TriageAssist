@@ -1,19 +1,23 @@
-# TriageAssist - Auditing
+# TriageAssist - Auditing with Quantitative Analysis
 
 ## This repository is adapted from [Heart Disease Prediction](https://github.com/ShubhankarRawat/Heart-Disease-Prediction.git)
 
 ## Introduction
 
 Cardiovascular diseases (CVDs) are the leading cause of death worldwide, resulting in 17.9 million deaths annually, or 31% of global deaths. In a major hospital's emergency department, swift and accurate triaging can be the difference between life and death, especially for patients with potential heart conditions. 
-Using machine learning, we are able to detect the common patterns between CVD patients and predict whether the patient is at high risk.
+
+Triaging in emergency departments describes a process of scoring and sorting the patients according to their level of urgency to optimize the distribution of medical resources. The TriageAssist to be developed in this repository uses machine learning algorithms to find out the common patterns in cardivascular diseases symptoms and predict the probability of heart diseases subject to the patient data. Such system is expected to act as an additional indication to the healthcare professions for faster and more accurate triaging process.
+
+Despite the anticipated convenience brought by the TriageAssist system, problems can arise when the system is not properly developed and its prediction is not properly understood. Therefore, in this repository, we apply model interpretation and fairness investigation toolkits to quantitatively analyze a range of machine learning algorithms. Our objective is to spot the common pitfalls in these models and alarm the potential stakeholders about them.
+
 
 ## Install packages
 ```
 pip install -r requirements.txt
 ```
 
-
 ## Dataset Attribute Information
+The dataset is stored in the `heart.csv` file.
    1. Age: age of the patient [years]
    2. Sex: sex of the patient [M: Male, F: Female]
    3. ChestPainType: chest pain type [TA: Typical Angina, ATA: Atypical Angina, NAP: Non-Anginal Pain, ASY: Asymptomatic]
@@ -37,7 +41,13 @@ pip install -r requirements.txt
 
    The dataset is split into training and test set by the ratio 8:2. The training set has been augmented to ensure balance between the genders.
 
-## Model Training and Prediction
+   To visualize the distribution of the dataset, please go through `dataset_visualize.ipynb` by running cell by cell.
+
+## Models
+
+
+
+### Model Training and Prediction
 `helper_func.py` contains a function which balances the number of labels.
 To see model training results before balancing:
 Run it directly by
@@ -75,6 +85,16 @@ The figures will be automatically saved.
 ## Audit the fairness of models
 `Fairlearn` is used for measureing all types of fairness metrics, to view all kinds of results, run
 ```
-python3 model_fairness.py [model_name_abbr]
+python3 model_fairness_gender.py [model_name_abbr]
+python3 model_fariness_age.py [model_name_abbr]
 ```
 where models include Decision Tree [DT], Random Forest [RF], Logistic Reg [LR], [SVM] (Linear), Naive Bayes [NB], [LightGBM], XGBoost [XGB], [Adaboost], multi-layer perceptron [MLP]. Use the names in [] when running the program.
+
+`dataset_load_and_test.ipynb` also contains a brief walkthrough of the Fairlearn toolkits. To see the result, open it and run cell by cell.
+
+## Result Visualization
+To visualize the results from audits, run
+```
+python3 plots.py
+```
+The figures are automatically saved in the folders.
