@@ -104,3 +104,7 @@ To visualize the results from audits, run
 python3 plots.py
 ```
 The figures are automatically saved in the folders.
+
+## Authors
+Xuening Dong
+Tamara Paris
