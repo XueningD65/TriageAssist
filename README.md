@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ```
 
 ## Dataset Attribute Information
-The dataset is stored in the `heart.csv` file.
+The dataset is stored in the [heart.csv](../main/heart.csv) file.
    1. Age: age of the patient [years]
    2. Sex: sex of the patient [M: Male, F: Female]
    3. ChestPainType: chest pain type [TA: Typical Angina, ATA: Atypical Angina, NAP: Non-Anginal Pain, ASY: Asymptomatic]
@@ -41,14 +41,20 @@ The dataset is stored in the `heart.csv` file.
 
    The dataset is split into training and test set by the ratio 8:2. The training set has been augmented to ensure balance between the genders.
 
-   To visualize the distribution of the dataset, please go through `dataset_visualize.ipynb` by running cell by cell.
+   To visualize the distribution of the dataset, please go through [dataset_visualize.ipynb](../main/dataset_visualize.ipynb) by running cell by cell.
 
 ## Models
 
-
+1. **Tree-based Classifiers**:
+   
+   Decision Tree (DT), Random Forest (RF), AdaBoost, XGBoost (XGB), LightGBM.
+   
+2. **Other statistical Classifiers**:
+   
+   Gaussian Naive Bayes (NB), Support Vector Machine (SVM), Logistic Regression (LR), Multi-Layer Perceptron (MLP).
 
 ### Model Training and Prediction
-`helper_func.py` contains a function which balances the number of labels.
+[helper_func.py](../main/helper_func.py) contains a function which balances the number of labels.
 To see model training results before balancing:
 Run it directly by
 ```
@@ -70,9 +76,9 @@ For those directly plotted in `matplotlib`, run
 python3 model_explain_FI_SHAP.py
 ```
 
-For those requiring HTML to display results, open `model_explain_FI_HTML.ipynb` and run cell by cell.
+For those requiring HTML to display results, open [model_explain_FI_HTML.ipynb](../main/model_explain_FI_HTML.ipynb) and run cell by cell.
 
-We also verified the ranking of feature importance, and whether they positively or negatively impacted the final decision using `LIME` package. To see the results from it, open `model_explain_FI_LIME.ipynb` and run cell by cell.
+We also verified the ranking of feature importance, and whether they positively or negatively impacted the final decision using `LIME` package. To see the results from it, open [model_explain_FI_LIME.ipynb](../main/model_explain_FI_LIME.ipynb) and run cell by cell.
 
 ### Partial Dependence Plot (PDP)
 `SHAP` and `sklearn` is used for interpreting the black box models with feature importance (FI).
@@ -90,7 +96,7 @@ python3 model_fariness_age.py [model_name_abbr]
 ```
 where models include Decision Tree [DT], Random Forest [RF], Logistic Reg [LR], [SVM] (Linear), Naive Bayes [NB], [LightGBM], XGBoost [XGB], [Adaboost], multi-layer perceptron [MLP]. Use the names in [] when running the program.
 
-`dataset_load_and_test.ipynb` also contains a brief walkthrough of the Fairlearn toolkits. To see the result, open it and run cell by cell.
+[dataset_load_and_test.ipynb](../main/dataset_load_and_test.ipynb) also contains a brief walkthrough of the Fairlearn toolkits. To see the result, open it and run cell by cell.
 
 ## Result Visualization
 To visualize the results from audits, run
